@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09090d">
+<title>PromptVerse — AI Prompt Library</title>
+<style>
+:root{
+  --bg:#09090d;--surface:#15151d;--surface2:#1d1d28;--card:#15151d;
+  --text:#f7f7fb;--muted:#9999aa;--line:#292938;--accent:#a78bfa;
+  --accent2:#8063df;--shadow:0 18px 55px #0006;
+}
+body.light{
+  --bg:#f5f5fa;--surface:#fff;--surface2:#eeeef5;--card:#fff;
+  --text:#171722;--muted:#686879;--line:#dedee9;--accent:#7652d6;
+  --accent2:#6544c4;--shadow:0 16px 45px #29204a18;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;transition:background .25s,color .25s;padding-bottom:92px}
+button,input{font:inherit}
+button{cursor:pointer}
+.topbar{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 19px;position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:850;letter-spacing:-.5px}
+.brand-mark{width:35px;height:35px;border-radius:12px;background:linear-gradient(135deg,#b69aff,#7653d6);display:grid;place-items:center;color:white}
+.brand-mark svg{width:22px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.icon-btn{width:42px;height:42px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:13px;display:grid;place-items:center}
+.icon-btn svg{width:21px;height:21px}
+main{max-width:1100px;margin:auto;padding:20px 16px 30px}
+.hero{padding:16px 3px 20px}
+.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.hero h1{font-size:clamp(27px,6vw,42px);letter-spacing:-1.4px;margin:9px 0 8px;line-height:1.12}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+.toolbar{display:flex;gap:10px;margin:12px 0 20px}
+.search-wrap{flex:1;position:relative}
+.search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;color:var(--muted)}
+.search{width:100%;height:46px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);padding:0 14px 0 42px;outline:none}
+.search:focus{border-color:var(--accent)}
+.filter{height:46px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text)}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:8px 2px 14px}
+.section-head h2{font-size:18px;margin:0}
+.count{font-size:12px;color:var(--muted)}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.prompt-card{min-width:0;overflow:hidden;border:1px solid var(--line);background:var(--card);border-radius:17px;cursor:pointer;transition:transform .18s,border-color .18s}
+.prompt-card:active{transform:scale(.985)}
+.prompt-card:hover{border-color:var(--accent)}
+.thumb{height:150px;position:relative;background:var(--surface2);overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.type-pill{position:absolute;left:10px;top:10px;background:#09090dcc;color:#fff;padding:6px 9px;border-radius:8px;font-size:10px;font-weight:750;letter-spacing:.4px}
+.card-body{padding:12px}
+.card-title{font-size:14px;font-weight:800;line-height:1.35;margin:0 0 6px}
+.card-category{font-size:11px;color:var(--accent);font-weight:650}
+.card-meta{display:flex;align-items:center;justify-content:space-between;margin-top:11px;color:var(--muted);font-size:10px}
+.card-meta span{display:flex;align-items:center;gap:5px}
+.card-meta svg{width:13px;height:13px}
+.empty{grid-column:1/-1;text-align:center;padding:45px 15px;color:var(--muted)}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,620px);z-index:30;display:flex;justify-content:space-around;padding:10px 18px calc(10px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--surface) 94%,transparent);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;backdrop-filter:blur(18px);box-shadow:0 -8px 30px #0002}
+.nav-btn{min-width:110px;border:0;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 18px;border-radius:13px;font-size:13px;font-weight:750}
+.nav-btn svg{width:21px;height:21px}
+.nav-btn.active{background:color-mix(in srgb,var(--accent) 15%,var(--surface));color:var(--accent)}
+.overlay{position:fixed;inset:0;background:#000a;z-index:50;display:none;align-items:flex-end;justify-content:center;padding:0}
+.overlay.show{display:flex}
+.modal{width:min(100%,720px);max-height:94dvh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:24px 24px 0 0;box-shadow:var(--shadow);position:relative;animation:rise .22s ease}
+@keyframes rise{from{transform:translateY(30px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.modal-cover{height:220px;position:relative;background:var(--surface2)}
+.modal-cover img{width:100%;height:100%;object-fit:cover}
+.close-btn{position:absolute;right:14px;top:14px;width:40px;height:40px;border:1px solid #ffffff55;background:#101018cc;color:white;border-radius:50%;display:grid;place-items:center}
+.close-btn svg{width:20px}
+.modal-content{padding:21px 18px 30px}
+.modal-title{font-size:26px;line-height:1.2;margin:0 0 7px;letter-spacing:-.7px}
+.category-line{color:var(--accent);font-size:13px;font-weight:700;margin-bottom:22px}
+.subhead{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:850;margin:18px 0 13px}
+.subhead svg{width:20px;height:20px;color:var(--accent)}
+.dna-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dna-box{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:15px 7px;text-align:center}
+.dna-value{font-size:22px;font-weight:850;color:var(--accent);white-space:nowrap}
+.dna-label{font-size:11px;color:var(--muted);margin-top:4px}
+.generate-btn,.copy-btn,.external-buttons button{border:1px solid transparent;border-radius:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px}
+.generate-btn{width:100%;height:52px;margin:20px 0 14px;background:linear-gradient(135deg,#a78bfa,#7653d6);color:white;font-size:15px}
+.generate-btn svg{width:19px;height:19px}
+.generate-btn:disabled{opacity:.75}
+.loader{display:none;text-align:center;color:var(--accent);font-size:13px;padding:10px}
+.loader.show{display:block}
+.spinner{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prompt-area{display:none}
+.prompt-area.show{display:block}
+.prompt-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:17px;margin:12px 0}
+.prompt-heading{display:flex;align-items:center;gap:9px;color:var(--accent);font-size:14px;font-weight:850;margin:0 0 12px}
+.prompt-heading svg{width:20px;height:20px;flex:none}
+.prompt-text{margin:0;color:var(--muted);font-size:14px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.copy-btn{width:100%;height:52px;background:color-mix(in srgb,var(--accent) 17%,var(--surface));border-color:color-mix(in srgb,var(--accent) 30%,var(--line));color:var(--text);font-size:14px;margin:14px 0}
+.copy-btn svg{width:20px;height:20px}
+.external-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.external-buttons button{min-height:54px;padding:10px 8px;background:var(--surface2);border-color:var(--line);color:var(--text);font-size:13px}
+.external-buttons button svg{width:22px;height:22px;flex:none}
+.external-buttons button:active,.copy-btn:active,.generate-btn:active{transform:scale(.985)}
+.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:var(--text);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:13px;font-weight:750;z-index:80;transition:.2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.splash{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:15px;transition:opacity .35s,visibility .35s}
+.splash.hide{opacity:0;visibility:hidden}
+.splash-logo{width:76px;height:76px;border-radius:25px;background:linear-gradient(135deg,#b69aff,#7653d6);display:grid;place-items:center;color:#fff;box-shadow:0 15px 45px #8b5cf655}
+.splash-logo svg{width:40px;height:40px}
+.splash-name{font-size:25px;font-weight:900;letter-spacing:-.8px}
+.splash-sub{font-size:12px;color:var(--muted);letter-spacing:1.6px;text-transform:uppercase}
+@media(min-width:700px){
+ main{padding:28px 24px 45px}.gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+ .thumb{height:190px}.overlay{align-items:center;padding:20px}.modal{border-radius:24px;max-height:90dvh}
+ .modal-cover{height:270px}.modal-content{padding:25px 28px 32px}
+}
+@media(max-width:360px){.thumb{height:120px}.card-body{padding:10px}.nav-btn{min-width:95px;padding:8px 10px}.dna-value{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <div class="splash-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/></svg></div>
+  <div class="splash-name">PromptVerse</div><div class="splash-sub">Your AI prompt library</div>
+</div>
+
+<header class="topbar">
+  <div class="brand"><div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/></svg></div>PromptVerse</div>
+  <div class="top-actions">
+    <button class="icon-btn" id="themeToggle" aria-label="Switch theme" title="Switch theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow" id="heroEyebrow">Explore the collection</div>
+    <h1 id="heroTitle">Discover your next<br>creative prompt.</h1>
+    <p id="heroDesc">Ready-to-use AI prompts for stunning images and cinematic videos.</p>
+  </section>
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input class="search" id="searchInput" type="search" placeholder="Search prompts..." autocomplete="off">
+    </div>
+    <button class="filter" id="allFilter">All</button>
+  </div>
+  <div class="section-head"><h2 id="galleryHeading">Image Prompts</h2><span class="count" id="resultCount"></span></div>
+  <section class="gallery" id="gallery"></section>
+</main>
+
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button class="nav-btn active" id="imagesTab" onclick="switchTab('images')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>Images
+  </button>
+  <button class="nav-btn" id="videosTab" onclick="switchTab('videos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z"/></svg>Videos
+  </button>
+</nav>
+
+<div class="overlay" id="overlay" onclick="backdropClose(event)">
+  <article class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-cover"><img id="modalImage" src="" alt=""><button class="close-btn" onclick="closeModal()" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 6-12 12M6 6l12 12"/></svg>
+    </button></div>
+    <div class="modal-content">
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="category-line" id="modalCategory"></div>
+      <div class="subhead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/></svg>Prompt DNA</div>
+      <div class="dna-grid">
+        <div class="dna-box"><div class="dna-value" id="dnaStyle">Cinematic</div><div class="dna-label">Style</div></div>
+        <div class="dna-box"><div class="dna-value">9:16</div><div class="dna-label">Aspect Ratio</div></div>
+        <div class="dna-box"><div class="dna-value">4K</div><div class="dna-label">Quality</div></div>
+      </div>
+      <button class="generate-btn" id="generateBtn" onclick="generatePrompt()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/></svg>
+        Generate Prompt
+      </button>
+      <div class="loader" id="loader"><div class="spinner"></div>Generating your creative prompt...</div>
+      <div class="prompt-area" id="promptArea">
+        <div class="prompt-box">
+          <h3 class="prompt-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>MAIN PROMPT</h3>
+          <p class="prompt-text" id="mainPrompt"></p>
+        </div>
+        <div class="prompt-box">
+          <h3 class="prompt-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>NEGATIVE PROMPT</h3>
+          <p class="prompt-text" id="negativePrompt"></p>
+        </div>
+        <button class="copy-btn" onclick="copyPrompt()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+          Copy to Clipboard
+        </button>
+        <div class="external-buttons">
+          <button id="aiButton1" onclick="openAI('first')">
+            <svg id="aiIcon1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a4 4 0 0 1 3.5 2.1 4 4 0 0 1 3.7 5.8 4 4 0 0 1-1.2 6.5 4 4 0 0 1-7 2.6 4 4 0 0 1-6.1-4.8 4 4 0 0 1 .7-6.5A4 4 0 0 1 12 3.5Z"/><path d="m8 8 8 8M16 8l-8 8"/></svg>
+            <span id="aiLabel1">Open ChatGPT</span>
+          </button>
+          <button id="aiButton2" onclick="openAI('second')">
+            <svg id="aiIcon2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/></svg>
+            <span id="aiLabel2">Open Gemini</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </article>
+</div>
+<div class="toast" id="toast">Copied successfully</div>
+
+<script>
+const prompts = {
+ images: [
+  {title:"Luxury Mansion",category:"Luxury Architecture",style:"Cinematic",image:"https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1000&q=85",main:"A breathtaking ultra-luxury modern mansion with grand architecture, tall palm trees, a stunning fountain and a polished marble driveway, cinematic golden-hour sunlight, rich warm highlights, deep shadows, premium architectural photography, ultra-detailed, 4K HDR, vertical 9:16.",negative:"Blurry, low quality, distorted architecture, bad proportions, duplicate objects, oversaturated colors, text, watermark."},
+  {title:"Luxury Sports Car",category:"Automotive",style:"Realistic",image:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1000&q=85",main:"A stunning luxury sports car parked on a modern city street, glossy bodywork, dramatic cinematic reflections, premium automotive photography, crisp details, realistic lighting, 4K HDR, vertical 9:16.",negative:"Blurry image, damaged car, distorted wheels, extra wheels, bad reflections, text, watermark."},
+  {title:"Royal Palace Interior",category:"Interior Design",style:"Royal",image:"https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1000&q=85",main:"An extraordinary royal palace living room with elegant golden furniture, crystal chandelier, marble flooring, luxurious pillars, elegant sofas, warm cinematic lighting, rich gold tones, highly detailed 3D environment, 4K HDR, vertical 9:16.",negative:"Low quality, flat lighting, distorted furniture, messy composition, blur, watermark, text."},
+  {title:"Cinematic Portrait",category:"Portrait Photography",style:"Cinematic",image:"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1000&q=85",main:"A cinematic editorial portrait with expressive eyes, refined studio lighting, subtle background depth, natural skin texture, professional photography, rich tonal contrast, ultra-detailed, 4K HDR, vertical 9:16.",negative:"Unnatural face, extra features, plastic skin, blur, low resolution, text, watermark."},
+  {title:"Luxury Boutique",category:"Fashion & Retail",style:"Luxury",image:"https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=85",main:"An elegant high-end fashion boutique with polished marble floors, golden lighting, designer-inspired display windows, refined mannequins and luxurious interior styling, cinematic composition, 4K HDR, vertical 9:16.",negative:"Clutter, low quality, warped shelves, distorted mannequins, unreadable text, watermark."},
+  {title:"Dreamy Landscape",category:"Nature",style:"Dreamy",image:"https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1000&q=85",main:"A breathtaking mountain lake landscape at sunrise, soft mist drifting above still water, dramatic mountain reflections, vivid natural colors, cinematic atmosphere, crisp details, 4K HDR, vertical 9:16.",negative:"Low resolution, muddy colors, oversharpening, distorted mountains, text, watermark."}
+ ],
+ videos: [
+  {title:"Helicopter Formation",category:"Aerial Cinematic",style:"Aerial",image:"https://images.unsplash.com/photo-1474302770737-173ee21bab63?auto=format&fit=crop&w=1000&q=85",main:"Three black luxury helicopters flying together in a perfect formation across a bright blue sky. Rotating rotor blades, smooth aerial camera movement, dramatic cinematic composition, realistic clouds, subtle golden detailing, ultra detailed, 4K HDR, vertical 9:16.",negative:"Frozen rotor blades, distorted helicopters, extra wings, unnatural movement, flickering, blurry footage, text, watermark."},
+  {title:"Luxury Car Convoy",category:"Cinematic Travel",style:"Cinematic",image:"https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=85",main:"A convoy of elegant luxury black and white cars driving smoothly along a wide modern boulevard at golden hour, low tracking camera, realistic wheel rotation, cinematic reflections, dynamic but stable movement, 4K HDR, vertical 9:16.",negative:"Frozen wheels, warped cars, collisions, flickering, shaky camera, duplicate vehicles, text, watermark."},
+  {title:"Golden Hour Mansion Reveal",category:"Luxury Cinematic",style:"Cinematic",image:"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=85",main:"A slow cinematic reveal of a grand modern luxury mansion at golden hour, camera gliding forward past palm trees and a fountain toward the impressive entrance, warm golden highlights, rich shadows, smooth motion, 4K HDR, vertical 9:16.",negative:"Fast jerky camera, flickering, warped building, distorted plants, low quality, text, watermark."},
+  {title:"Ocean Aerial Shot",category:"Nature Film",style:"Aerial",image:"https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1000&q=85",main:"A smooth drone shot gliding above a brilliant turquoise ocean, gentle waves rolling toward a pristine coastline, sunlight sparkling on the water, cinematic natural color grading, realistic motion, 4K HDR, vertical 9:16.",negative:"Choppy camera, unnatural waves, flicker, blurry details, oversaturated colors, text, watermark."}
+ ]
+};
+let currentTab="images", selectedPrompt=null, selectedIndex=-1, generated=false, generateTimer=null;
+const $=id=>document.getElementById(id);
+function safeImage(url){
+  // If a remote image is unavailable, use a neutral gradient fallback.
+  return url;
+}
+function renderGallery(){
+ const q=$("searchInput").value.trim().toLowerCase();
+ const list=prompts[currentTab].map((p,i)=>({...p,index:i})).filter(p=>(p.title+" "+p.category+" "+p.style).toLowerCase().includes(q));
+ $("galleryHeading").textContent=currentTab==="images"?"Image Prompts":"Video Prompts";
+ $("resultCount").textContent=list.length+" prompts";
+ $("heroEyebrow").textContent=currentTab==="images"?"Explore image prompts":"Explore video prompts";
+ $("heroTitle").innerHTML=currentTab==="images"?"Discover your next<br>creative prompt.":"Bring your next<br>video idea to life.";
+ $("heroDesc").textContent=currentTab==="images"?"Ready-to-use prompts for stunning AI images.":"Cinematic prompts designed for AI video creation.";
+ $("gallery").innerHTML="";
+ if(!list.length){$("gallery").innerHTML='<div class="empty">No prompts found. Try another search.</div>';return;}
+ list.forEach(p=>{
+  const card=document.createElement("article");card.className="prompt-card";card.onclick=()=>openModal(p.index);
+  const img=document.createElement("img");img.src=safeImage(p.image);img.alt=p.title;img.loading="lazy";img.onerror=()=>{img.style.display="none";};
+  const thumb=document.createElement("div");thumb.className="thumb";thumb.append(img);
+  const pill=document.createElement("span");pill.className="type-pill";pill.textContent=currentTab==="images"?"IMAGE":"VIDEO";thumb.append(pill);
+  const body=document.createElement("div");body.className="card-body";
+  const title=document.createElement("h3");title.className="card-title";title.textContent=p.title;
+  const cat=document.createElement("div");cat.className="card-category";cat.textContent=p.category;
+  const meta=document.createElement("div");meta.className="card-meta";meta.innerHTML='<span>9:16 Ratio</span><span>4K Quality</span>';
+  body.append(title,cat,meta);card.append(thumb,body);$("gallery").append(card);
+ });
+}
+function switchTab(tab){
+ currentTab=tab;
+ $("imagesTab").classList.toggle("active",tab==="images");
+ $("videosTab").classList.toggle("active",tab==="videos");
+ $("searchInput").value="";
+ renderGallery();
+}
+function openModal(index){
+ selectedIndex=index;selectedPrompt=prompts[currentTab][index];generated=false;
+ $("modalImage").src=selectedPrompt.image;$("modalImage").alt=selectedPrompt.title;
+ $("modalTitle").textContent=selectedPrompt.title;$("modalCategory").textContent=selectedPrompt.category;
+ $("dnaStyle").textContent=selectedPrompt.style;
+ $("promptArea").classList.remove("show");$("loader").classList.remove("show");
+ $("generateBtn").disabled=false;$("generateBtn").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/></svg>Generate Prompt';
+ updateAIButtons();$("overlay").classList.add("show");document.body.style.overflow="hidden";
+}
+function closeModal(){$("overlay").classList.remove("show");document.body.style.overflow="";}
+function backdropClose(e){if(e.target===$("overlay"))closeModal();}
+function generatePrompt(){
+ if(!selectedPrompt||generated)return;
+ $("generateBtn").disabled=true;$("loader").classList.add("show");
+ generateTimer=setTimeout(()=>{
+  $("mainPrompt").textContent=selectedPrompt.main;$("negativePrompt").textContent=selectedPrompt.negative;
+  $("loader").classList.remove("show");$("promptArea").classList.add("show");
+  $("generateBtn").disabled=false;$("generateBtn").textContent="Prompt Generated";generated=true;
+ },1100);
+}
+async function copyPrompt(){
+ if(!selectedPrompt)return;
+ const text="MAIN PROMPT:\n"+selectedPrompt.main+"\n\nNEGATIVE PROMPT:\n"+selectedPrompt.negative;
+ try{await navigator.clipboard.writeText(text);showToast("Prompt copied to clipboard");}
+ catch(e){const t=document.createElement("textarea");t.value=text;document.body.append(t);t.select();document.execCommand("copy");t.remove();showToast("Prompt copied");}
+}
+function updateAIButtons(){
+ $("aiLabel1").textContent=currentTab==="videos"?"Open Gemini":"Open ChatGPT";
+ $("aiLabel2").textContent=currentTab==="videos"?"Open Flow AI":"Open Gemini";
+ // Update icon artwork to match the active service.
+ $("aiIcon1").innerHTML=currentTab==="videos"
+  ?'<path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/>'
+  :'<path d="M12 3.5a4 4 0 0 1 3.5 2.1 4 4 0 0 1 3.7 5.8 4 4 0 0 1-1.2 6.5 4 4 0 0 1-7 2.6 4 4 0 0 1-6.1-4.8 4 4 0 0 1 .7-6.5A4 4 0 0 1 12 3.5Z"/><path d="m8 8 8 8M16 8l-8 8"/>';
+ $("aiIcon2").innerHTML=currentTab==="videos"
+  ?'<path d="M4 5h16v14H4z"/><path d="m10 9 5 3-5 3z"/>'
+  :'<path d="M12 2.5c1.2 5.1 4.4 8.3 9.5 9.5-5.1 1.2-8.3 4.4-9.5 9.5-1.2-5.1-4.4-8.3-9.5-9.5 5.1-1.2 8.3-4.4 9.5-9.5Z"/>';
+}
+function openAI(which){
+ const isVideo=currentTab==="videos";
+ let url;
+ if(isVideo)url=which==="first"?"https://gemini.google.com/app":"https://labs.google/fx/tools/flow";
+ else url=which==="first"?"https://chatgpt.com/":"https://gemini.google.com/app";
+ window.open(url,"_blank","noopener");
+}
+function showToast(message){$("toast").textContent=message;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1900);}
+$("themeToggle").addEventListener("click",()=>{
+ document.body.classList.toggle("light");
+ const light=document.body.classList.contains("light");
+ $("themeIcon").innerHTML=light?'<path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/>':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>';
+});
+$("searchInput").addEventListener("input",renderGallery);
+$("allFilter").addEventListener("click",()=>{$("searchInput").value="";renderGallery();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+renderGallery();
+setTimeout(()=>$("splash").classList.add("hide"),900);
+</script>
+</body>
+</html>
